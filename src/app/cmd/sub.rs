@@ -23,7 +23,7 @@ impl mma::DbCommand for AppSubcmd {
     fn exec_using(self, connection: &mut diesel::MysqlConnection) -> Result<Self::T, Self::E> {
         match self {
             AppSubcmd::Human { subcmd } => subcmd.exec_using(connection),
-            AppSubcmd::Serve(subcmd) => subcmd.exec_using(connection),
+            AppSubcmd::Serve(subcmd) => subcmd.exec(),
         }
     }
 }

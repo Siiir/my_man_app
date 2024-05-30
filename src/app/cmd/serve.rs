@@ -1,6 +1,7 @@
 //! Provides utilities to form & execute command that will make this app into server..
 
 use actix_web::{web, HttpResponse, HttpServer};
+use anyhow::Context;
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
@@ -17,29 +18,34 @@ pub struct ServeCmd {
 }
 
 impl ServeCmd {
+    // CRUD-R: Properties
+
     /// Returns a socket address that should be used for serving.
     pub fn host_addr(&self) -> SocketAddr {
         SocketAddr::new(self.ip_addr, self.port)
     }
-}
 
-impl mma::DbCommand for ServeCmd {
-    type T = ();
+    // CRUD-D: Consuming usage.
 
-    type E = anyhow::Error;
-
-    fn exec_using(self, _connection: &mut diesel::MysqlConnection) -> Result<Self::T, Self::E>
-    where
-        Self: Sized,
-    {
-        // Create and run the Actix system
+    /// Executes command [`self`] by running a server.
+    pub fn exec(self) -> anyhow::Result<()> {
+        // Creating actix runtime.
         let sys = actix_web::rt::System::new();
-        sys.block_on(async {
-            HttpServer::new(|| actix_web::App::new().route("/", web::get().to(HttpResponse::Ok)))
-                .bind(self.host_addr())?
-                .run()
-                .await
-        })?;
-        Ok(())
+        // Running actix server.
+        sys.block_on(self.serve_using_actix())
+    }
+
+    async fn serve_using_actix(self) -> anyhow::Result<()> {
+        HttpServer::new(|| actix_web::App::new().route("/", web::get().to(HttpResponse::Ok)))
+            .bind(self.host_addr())
+            .with_context(|| {
+                format!(
+                    "The server has encountered I/O errror, while trying to bind to {:}.",
+                    self.host_addr()
+                )
+            })?
+            .run()
+            .await
+            .context("The server has encountered I/O error, while running.")
     }
 }
