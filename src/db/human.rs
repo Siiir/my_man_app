@@ -17,7 +17,8 @@ pub fn add(
         .transaction(
             |connection: &mut diesel::MysqlConnection| -> anyhow::Result<()> {
                 insert(connection, new_human)?;
-                let inserted_human: models::Human = crate::db::human::with_highest_id(connection)?;
+                let inserted_human: models::Human =
+                    crate::db::human::that_was_just_inserted(connection)?;
                 eprintln!(
                     "Successfully inserted human record:\n{:}",
                     crate::util::prin_table([&inserted_human])
@@ -94,7 +95,7 @@ pub fn find(
 }
 
 /// Finds the human with the highest id number if exists.
-pub fn with_highest_id(
+pub fn that_was_just_inserted(
     connection: &mut diesel::MysqlConnection,
 ) -> Result<models::Human, anyhow::Error> {
     let out = schema::Human::table

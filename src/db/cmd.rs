@@ -2,7 +2,9 @@
 ///
 /// Applicable for commands that need a database (in form of connection) to be executed.
 pub trait DbCommand {
+    /// The optimistic return type for the `self` command.
     type T;
+    /// The pesimistic return type for the `self` command.
     type E: Into<anyhow::Error>;
 
     // Required methods.

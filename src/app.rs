@@ -3,5 +3,5 @@
 
 pub use args::Args;
 pub mod args;
-pub use cmd::human::HumanCmd;
+pub use cmd::{human::HumanCmd, serve::ServeCmd};
 pub mod cmd;
