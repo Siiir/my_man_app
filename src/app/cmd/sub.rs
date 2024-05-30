@@ -11,7 +11,7 @@ pub enum AppSubcmd {
         #[command(subcommand)]
         subcmd: crate::app::HumanCmd,
     },
-    /// Will cause app to serve its content at `at_addr`.
+    /// Will cause app to serve its content.
     Serve(crate::app::ServeCmd),
     // Commands that could be implemented in the future:
     // Project {},
