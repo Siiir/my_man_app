@@ -40,40 +40,20 @@ pub fn add(
 /// You can then try to narrow the search group by repetitive calls.
 pub fn search(
     connection: &mut diesel::MysqlConnection,
-    pattern: crate::HumanPatternBuf,
+    mut pattern: crate::HumanPatternBuf,
 ) -> anyhow::Result<Vec<models::Human>> {
-    // Type aliases
-    use diesel::sql_types::Bool;
-    type NullableBool = diesel::sql_types::Nullable<Bool>;
-    type BoxedSubfilter<T> = Box<
-        dyn diesel::BoxableExpression<
-            crate::schema::Human::table,
-            diesel::mysql::Mysql,
-            SqlType = T,
-        >,
-    >;
-
-    // Imports
-    use diesel::NullableExpressionMethods;
-
-    // Definitions
-    macro_rules! req {
-        ($field_id: ident) => {{
-            let out: Option<BoxedSubfilter<NullableBool>> =
-                if let Some(field_val) = pattern.$field_id {
-                    let sf = crate::schema::Human::$field_id.eq(field_val);
-                    Some(Box::new(sf.nullable()))
-                } else {
-                    None
-                };
-            out
-        }};
-    }
-
-    // Algorithm
-
     // Prepare filter
-    let filter = [req!(id), req!(name), req!(surname), req!(nickname)];
+    let filter = {
+        let f = [
+            pattern.id_filter(),
+            pattern.take_name_filter(),
+            pattern.take_surname_filter(),
+            pattern.take_nickname_filter(),
+        ];
+        // It has been spoiled by ".take_*" methods.
+        std::mem::drop(pattern);
+        f
+    };
     let filter = filter
         .into_iter()
         .flatten()

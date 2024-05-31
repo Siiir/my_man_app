@@ -1,32 +1,131 @@
 pub mod human {
     pub mod buf {
         use derive_more::Constructor;
+        use serde::Deserialize;
 
-        #[derive(Clone, Debug, clap::Args, Constructor)]
+        use crate::util::{self, BoxedSubfilter, NullableBool};
+
+        #[derive(Clone, Debug, Constructor, Deserialize)]
         pub struct HumanPatternBuf {
             // Id
-            #[clap(long, short = 'i')]
             pub id: Option<i32>,
 
             // Name
-            #[clap(long, short = 'n')]
             pub name: Option<String>,
-            #[clap(long, short = 'N')]
-            pub name_is_re: bool,
+            pub like_name: bool,
 
             // Surname
-            #[clap(long, short = 's')]
             pub surname: Option<String>,
-            #[clap(long, short = 'S')]
-            pub surname_is_re: bool,
+            pub like_surname: bool,
 
-            /// Nickname. `-a` like alias.
-            #[clap(long, short = 'a')]
+            // Nickname.
             pub nickname: Option<String>,
-            #[clap(long, short = 'A')]
-            pub nickname_is_re: bool,
+            pub like_nickname: bool,
         }
 
+        impl HumanPatternBuf {
+            // CRUD-R: Properties
+            pub fn name_pattern_kind(&self) -> util::StrPatternKind {
+                util::StrPatternKind::from_like_flag(self.like_name)
+            }
+            pub fn surname_pattern_kind(&self) -> util::StrPatternKind {
+                util::StrPatternKind::from_like_flag(self.like_surname)
+            }
+            pub fn nickname_pattern_kind(&self) -> util::StrPatternKind {
+                util::StrPatternKind::from_like_flag(self.like_nickname)
+            }
+            pub fn pattren_kind_for(&self, field_name: &str) -> util::StrPatternKind {
+                match field_name {
+                    "name" => self.name_pattern_kind(),
+                    "surname" => self.surname_pattern_kind(),
+                    "nickname" => self.nickname_pattern_kind(),
+                    _ => panic!(
+                        "Invalid field name for `{}`. Or field name hasn't been registered in this function.",
+                        std::any::type_name::<Self>()
+                    ),
+                }
+            }
+            pub fn id_filter(&mut self) -> Option<BoxedSubfilter<NullableBool>> {
+                use diesel::ExpressionMethods;
+                let taken_field = self.id.take();
+
+                if let Some(field_val) = taken_field {
+                    let sf = crate::schema::Human::id.eq(field_val);
+                    Some(Box::new(diesel::NullableExpressionMethods::nullable(sf)))
+                } else {
+                    None
+                }
+            }
+            // CRUD-U: Stealing properties
+            pub fn take_name_filter(&mut self) -> Option<BoxedSubfilter<NullableBool>> {
+                {
+                    let taken_field = self.name.take();
+                    let pattern_kind = self.name_pattern_kind();
+                    use diesel::{ExpressionMethods, TextExpressionMethods};
+
+                    if let Some(field_val) = taken_field {
+                        Some(match pattern_kind {
+                            util::StrPatternKind::Literal => {
+                                let sf = crate::schema::Human::name.eq(field_val);
+                                Box::new(diesel::NullableExpressionMethods::nullable(sf))
+                            }
+                            util::StrPatternKind::Like => {
+                                let sf = crate::schema::Human::name.like(field_val);
+                                Box::new(diesel::NullableExpressionMethods::nullable(sf))
+                            }
+                        })
+                    } else {
+                        None
+                    }
+                }
+            }
+            pub fn take_surname_filter(&mut self) -> Option<BoxedSubfilter<NullableBool>> {
+                {
+                    let taken_field = self.surname.take();
+                    let pattern_kind = self.surname_pattern_kind();
+                    use diesel::{ExpressionMethods, TextExpressionMethods};
+
+                    if let Some(field_val) = taken_field {
+                        Some(match pattern_kind {
+                            util::StrPatternKind::Literal => {
+                                let sf = crate::schema::Human::surname.eq(field_val);
+                                Box::new(diesel::NullableExpressionMethods::nullable(sf))
+                            }
+                            util::StrPatternKind::Like => {
+                                let sf = crate::schema::Human::surname.like(field_val);
+                                Box::new(diesel::NullableExpressionMethods::nullable(sf))
+                            }
+                        })
+                    } else {
+                        None
+                    }
+                }
+            }
+            pub fn take_nickname_filter(&mut self) -> Option<BoxedSubfilter<NullableBool>> {
+                {
+                    let taken_field = self.nickname.take();
+                    let pattern_kind = self.nickname_pattern_kind();
+                    use diesel::{ExpressionMethods, TextExpressionMethods};
+
+                    if let Some(field_val) = taken_field {
+                        Some(match pattern_kind {
+                            util::StrPatternKind::Literal => {
+                                let sf = crate::schema::Human::nickname.eq(field_val);
+                                Box::new(diesel::NullableExpressionMethods::nullable(sf))
+                            }
+                            util::StrPatternKind::Like => {
+                                let sf = crate::schema::Human::nickname.like(field_val);
+                                Box::new(diesel::NullableExpressionMethods::nullable(sf))
+                            }
+                        })
+                    } else {
+                        None
+                    }
+                }
+            }
+        }
+
+        // CRUD-C: Conversions into `Self`
         impl<'b, 'c, 'd> From<crate::HumanPatternBor<'b, 'c, 'd>> for HumanPatternBuf {
             fn from(bor: crate::HumanPatternBor<'b, 'c, 'd>) -> Self {
                 let [name, surname, nickname] =
@@ -36,9 +135,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
-                    name_is_re: bor.name_is_re,
-                    surname_is_re: bor.surname_is_re,
-                    nickname_is_re: bor.nickname_is_re,
+                    like_name: bor.like_name,
+                    like_surname: bor.like_surname,
+                    like_nickname: bor.like_nickname,
                 }
             }
         }
@@ -51,9 +150,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
-                    name_is_re: own.name_is_re,
-                    surname_is_re: own.surname_is_re,
-                    nickname_is_re: own.nickname_is_re,
+                    like_name: own.like_name,
+                    like_surname: own.like_surname,
+                    like_nickname: own.like_nickname,
                 }
             }
         }
@@ -69,19 +168,19 @@ pub mod human {
             #[clap(long, short = 'n')]
             pub name: Option<Box<str>>,
             #[clap(long, short = 'N')]
-            pub name_is_re: bool,
+            pub like_name: bool,
 
             // Surname
             #[clap(long, short = 's')]
             pub surname: Option<Box<str>>,
             #[clap(long, short = 'S')]
-            pub surname_is_re: bool,
+            pub like_surname: bool,
 
             /// Nickname. `-a` like alias.
             #[clap(long, short = 'a')]
             pub nickname: Option<Box<str>>,
             #[clap(long, short = 'A')]
-            pub nickname_is_re: bool,
+            pub like_nickname: bool,
         }
 
         impl<'b, 'c, 'd> From<crate::HumanPatternBor<'b, 'c, 'd>> for HumanPatternOwn {
@@ -93,9 +192,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
-                    name_is_re: bor.name_is_re,
-                    surname_is_re: bor.surname_is_re,
-                    nickname_is_re: bor.nickname_is_re,
+                    like_name: bor.like_name,
+                    like_surname: bor.like_surname,
+                    like_nickname: bor.like_nickname,
                 }
             }
         }
@@ -109,9 +208,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
-                    name_is_re: bufferful.name_is_re,
-                    surname_is_re: bufferful.surname_is_re,
-                    nickname_is_re: bufferful.nickname_is_re,
+                    like_name: bufferful.like_name,
+                    like_surname: bufferful.like_surname,
+                    like_nickname: bufferful.like_nickname,
                 }
             }
         }
@@ -122,13 +221,13 @@ pub mod human {
             pub id: Option<i32>,
             // Name
             pub name: Option<&'b str>,
-            pub name_is_re: bool,
+            pub like_name: bool,
             // Surname
             pub surname: Option<&'c str>,
-            pub surname_is_re: bool,
+            pub like_surname: bool,
             // Nickname
             pub nickname: Option<&'d str>,
-            pub nickname_is_re: bool,
+            pub like_nickname: bool,
         }
 
         impl<'o> From<&'o crate::HumanPatternOwn> for HumanPatternBor<'o, 'o, 'o> {
@@ -144,9 +243,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
-                    name_is_re: owned.name_is_re,
-                    surname_is_re: owned.surname_is_re,
-                    nickname_is_re: owned.nickname_is_re,
+                    like_name: owned.like_name,
+                    like_surname: owned.like_surname,
+                    like_nickname: owned.like_nickname,
                 }
             }
         }
@@ -163,9 +262,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
-                    name_is_re: owned.name_is_re,
-                    surname_is_re: owned.surname_is_re,
-                    nickname_is_re: owned.nickname_is_re,
+                    like_name: owned.like_name,
+                    like_surname: owned.like_surname,
+                    like_nickname: owned.like_nickname,
                 }
             }
         }

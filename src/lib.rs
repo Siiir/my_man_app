@@ -1,3 +1,5 @@
+use anyhow::Context;
+
 // db
 pub use db::cmd::DbCommand;
 pub mod db;
@@ -10,6 +12,7 @@ pub mod models;
 pub mod schema;
 // pattern
 pub use pattern::human::{bor::HumanPatternBor, buf::HumanPatternBuf, own::HumanPatternOwn};
+use tracing_subscriber::FmtSubscriber;
 pub mod pattern;
 // name
 pub mod name_of {
@@ -28,27 +31,28 @@ pub mod name_of {
 }
 
 // Util
-pub mod util {
-    //! Utilities that could not be categorized.
-
-    /// Returns a printable table.
-    ///
-    /// Delibrate typing error in function name to make it more pleasant to read.
-    pub fn prin_table<I, T>(records: I) -> tabled::Table
-    where
-        I: IntoIterator<Item = T>,
-        T: tabled::Tabled,
-    {
-        let mut table = tabled::Table::new(records);
-        table.with(tabled::settings::Style::markdown());
-        table
-    }
-}
+pub mod util;
 
 /// Initializes this app.
 ///
 /// Makes sure that all environment stuff is accessible in standard way.
 pub fn init() {
     // Use of .env file.
-    _ = dotenvy::dotenv()
+    _ = dotenvy::dotenv();
+
+    // a builder for `FmtSubscriber`.
+    let subscriber = FmtSubscriber::builder()
+        // will be written to stdout.
+        .with_max_level(tracing::Level::TRACE)
+        // completes the builder.
+        .finish();
+
+    match tracing::subscriber::set_global_default(subscriber).context(
+        "Correct logs may not be produced, because app could not set global log subscriber.",
+    ) {
+        Ok(t) => t,
+        Err(e) => {
+            eprintln!("WARNING: {e}");
+        }
+    }
 }
