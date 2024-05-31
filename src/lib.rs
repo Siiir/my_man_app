@@ -1,5 +1,3 @@
-use anyhow::Context;
-
 // db
 pub use db::cmd::DbCommand;
 pub mod db;
@@ -12,7 +10,6 @@ pub mod models;
 pub mod schema;
 // pattern
 pub use pattern::human::{bor::HumanPatternBor, buf::HumanPatternBuf, own::HumanPatternOwn};
-use tracing_subscriber::FmtSubscriber;
 pub mod pattern;
 // name
 pub mod name_of {
@@ -33,26 +30,4 @@ pub mod name_of {
 // Util
 pub mod util;
 
-/// Initializes this app.
-///
-/// Makes sure that all environment stuff is accessible in standard way.
-pub fn init() {
-    // Use of .env file.
-    _ = dotenvy::dotenv();
-
-    // a builder for `FmtSubscriber`.
-    let subscriber = FmtSubscriber::builder()
-        // will be written to stdout.
-        .with_max_level(tracing::Level::TRACE)
-        // completes the builder.
-        .finish();
-
-    match tracing::subscriber::set_global_default(subscriber).context(
-        "Correct logs may not be produced, because app could not set global log subscriber.",
-    ) {
-        Ok(t) => t,
-        Err(e) => {
-            eprintln!("WARNING: {e}");
-        }
-    }
-}
+pub mod init;

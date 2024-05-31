@@ -1,25 +1,27 @@
 pub mod human {
     pub mod buf {
-        use derive_more::Constructor;
-        use serde::Deserialize;
+        use serde::{Deserialize, Serialize};
 
         use crate::util::{self, BoxedSubfilter, NullableBool};
 
-        #[derive(Clone, Debug, Constructor, Deserialize)]
+        #[derive(Clone, Debug, Deserialize, Serialize)]
         pub struct HumanPatternBuf {
             // Id
             pub id: Option<i32>,
 
             // Name
             pub name: Option<String>,
+            #[serde(default)]
             pub like_name: bool,
 
             // Surname
             pub surname: Option<String>,
+            #[serde(default)]
             pub like_surname: bool,
 
-            // Nickname.
+            // Nickname
             pub nickname: Option<String>,
+            #[serde(default)]
             pub like_nickname: bool,
         }
 

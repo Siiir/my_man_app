@@ -31,7 +31,7 @@ pub mod app;
 use mma::DbCommand;
 
 fn main() -> anyhow::Result<()> {
-    mma::init();
+    mma::init::all();
     let app_args: app::Args = clap::Parser::parse();
     app_args.subcmd.execute()
 }

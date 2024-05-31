@@ -1,6 +1,6 @@
 //! Provides utilities to form & execute command that will make this app into server..
 
-use actix_web::{web, HttpResponse, HttpServer};
+use actix_web::HttpServer;
 use anyhow::Context;
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
@@ -36,16 +36,20 @@ impl ServeCmd {
     }
 
     async fn serve_using_actix(self) -> anyhow::Result<()> {
-        HttpServer::new(|| actix_web::App::new().route("/", web::get().to(HttpResponse::Ok)))
-            .bind(self.host_addr())
-            .with_context(|| {
-                format!(
-                    "The server has encountered I/O errror, while trying to bind to {:}.",
-                    self.host_addr()
-                )
-            })?
-            .run()
-            .await
-            .context("The server has encountered I/O error, while running.")
+        HttpServer::new(|| {
+            let app = actix_web::App::new();
+            use mma::serv::*;
+            app.service(redirect_to_human).service(human::search)
+        })
+        .bind(self.host_addr())
+        .with_context(|| {
+            format!(
+                "The server has encountered I/O errror, while trying to bind to {:}.",
+                self.host_addr()
+            )
+        })?
+        .run()
+        .await
+        .context("The server has encountered I/O error, while running.")
     }
 }
