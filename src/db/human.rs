@@ -38,7 +38,7 @@ pub fn add(
 ///  and so the narrowing of the search group.
 /// So it meets the goal that this function can actually return many humans (the search group).
 /// You can then try to narrow the search group by repetitive calls.
-pub fn find(
+pub fn search(
     connection: &mut diesel::MysqlConnection,
     pattern: crate::HumanPatternBuf,
 ) -> anyhow::Result<Vec<models::Human>> {

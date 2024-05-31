@@ -1,6 +1,8 @@
 // db
 pub use db::cmd::DbCommand;
 pub mod db;
+// serving
+pub mod serv;
 // models
 pub mod models;
 // schema
@@ -48,5 +50,5 @@ pub mod util {
 /// Makes sure that all environment stuff is accessible in standard way.
 pub fn init() {
     // Use of .env file.
-    drop(dotenvy::dotenv())
+    _ = dotenvy::dotenv()
 }

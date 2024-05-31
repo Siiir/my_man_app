@@ -5,11 +5,11 @@
 pub enum HumanCmd {
     /// Adds a human to the database, with specific provided parameters.
     Add(mma::models::NewHumanOwn),
-    /// Finds a human in the database.
+    /// Finds humans in the database matching the specific pattern.
     ///
     /// The search is based on provided parameters that form a pattern.
-    /// The more parameters you give, the more specific/narrow the pattern will be.
-    Find(mma::HumanPatternOwn),
+    /// The more parameters you give, the more specific/narrow the pattern will be, the more narrow the result will be.
+    Search(mma::HumanPatternOwn),
     // Commands that could be implemented in the future:
     // Info(mma::HumanPatternOwn),
     // Forget { id: String },
@@ -22,8 +22,8 @@ impl mma::DbCommand for HumanCmd {
     fn exec_using(self, connection: &mut diesel::MysqlConnection) -> anyhow::Result<Self::T> {
         match self {
             HumanCmd::Add(new_human) => mma::db::human::add(connection, (&new_human).into()),
-            HumanCmd::Find(human_pattern) => {
-                let human_records = mma::db::human::find(connection, human_pattern.into())?;
+            HumanCmd::Search(human_pattern) => {
+                let human_records = mma::db::human::search(connection, human_pattern.into())?;
                 println!("{}", mma::util::prin_table(human_records));
                 Ok(())
             }

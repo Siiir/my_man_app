@@ -4,15 +4,27 @@ pub mod human {
 
         #[derive(Clone, Debug, clap::Args, Constructor)]
         pub struct HumanPatternBuf {
-            #[clap(long, short)]
+            // Id
+            #[clap(long, short = 'i')]
             pub id: Option<i32>,
-            #[clap(long, short)]
+
+            // Name
+            #[clap(long, short = 'n')]
             pub name: Option<String>,
-            #[clap(long, short)]
+            #[clap(long, short = 'N')]
+            pub name_is_re: bool,
+
+            // Surname
+            #[clap(long, short = 's')]
             pub surname: Option<String>,
-            /// `-a` like alias.
+            #[clap(long, short = 'S')]
+            pub surname_is_re: bool,
+
+            /// Nickname. `-a` like alias.
             #[clap(long, short = 'a')]
             pub nickname: Option<String>,
+            #[clap(long, short = 'A')]
+            pub nickname_is_re: bool,
         }
 
         impl<'b, 'c, 'd> From<crate::HumanPatternBor<'b, 'c, 'd>> for HumanPatternBuf {
@@ -24,6 +36,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
+                    name_is_re: bor.name_is_re,
+                    surname_is_re: bor.surname_is_re,
+                    nickname_is_re: bor.nickname_is_re,
                 }
             }
         }
@@ -36,6 +51,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
+                    name_is_re: own.name_is_re,
+                    surname_is_re: own.surname_is_re,
+                    nickname_is_re: own.nickname_is_re,
                 }
             }
         }
@@ -43,15 +61,27 @@ pub mod human {
     pub mod own {
         #[derive(Clone, Debug, clap::Args)]
         pub struct HumanPatternOwn {
-            #[clap(long, short)]
+            // Id
+            #[clap(long, short = 'i')]
             pub id: Option<i32>,
-            #[clap(long, short)]
+
+            // Name
+            #[clap(long, short = 'n')]
             pub name: Option<Box<str>>,
-            #[clap(long, short)]
+            #[clap(long, short = 'N')]
+            pub name_is_re: bool,
+
+            // Surname
+            #[clap(long, short = 's')]
             pub surname: Option<Box<str>>,
-            /// `-a` like alias.
+            #[clap(long, short = 'S')]
+            pub surname_is_re: bool,
+
+            /// Nickname. `-a` like alias.
             #[clap(long, short = 'a')]
             pub nickname: Option<Box<str>>,
+            #[clap(long, short = 'A')]
+            pub nickname_is_re: bool,
         }
 
         impl<'b, 'c, 'd> From<crate::HumanPatternBor<'b, 'c, 'd>> for HumanPatternOwn {
@@ -63,6 +93,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
+                    name_is_re: bor.name_is_re,
+                    surname_is_re: bor.surname_is_re,
+                    nickname_is_re: bor.nickname_is_re,
                 }
             }
         }
@@ -76,6 +109,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
+                    name_is_re: bufferful.name_is_re,
+                    surname_is_re: bufferful.surname_is_re,
+                    nickname_is_re: bufferful.nickname_is_re,
                 }
             }
         }
@@ -84,9 +120,15 @@ pub mod human {
         #[derive(Debug, Clone)]
         pub struct HumanPatternBor<'b, 'c, 'd> {
             pub id: Option<i32>,
+            // Name
             pub name: Option<&'b str>,
+            pub name_is_re: bool,
+            // Surname
             pub surname: Option<&'c str>,
+            pub surname_is_re: bool,
+            // Nickname
             pub nickname: Option<&'d str>,
+            pub nickname_is_re: bool,
         }
 
         impl<'o> From<&'o crate::HumanPatternOwn> for HumanPatternBor<'o, 'o, 'o> {
@@ -102,6 +144,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
+                    name_is_re: owned.name_is_re,
+                    surname_is_re: owned.surname_is_re,
+                    nickname_is_re: owned.nickname_is_re,
                 }
             }
         }
@@ -118,6 +163,9 @@ pub mod human {
                     name,
                     surname,
                     nickname,
+                    name_is_re: owned.name_is_re,
+                    surname_is_re: owned.surname_is_re,
+                    nickname_is_re: owned.nickname_is_re,
                 }
             }
         }
