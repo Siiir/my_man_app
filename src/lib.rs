@@ -1,5 +1,5 @@
 // db
-pub use db::cmd::DbCommand;
+pub use db::{cmd::DbCommand, DbPool};
 pub mod db;
 // serving
 pub mod serv;

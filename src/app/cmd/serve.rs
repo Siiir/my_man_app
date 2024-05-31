@@ -1,6 +1,6 @@
 //! Provides utilities to form & execute command that will make this app into server..
 
-use actix_web::HttpServer;
+use actix_web::{web, HttpServer};
 use anyhow::Context;
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
@@ -32,24 +32,36 @@ impl ServeCmd {
         // Creating actix runtime.
         let sys = actix_web::rt::System::new();
         // Running actix server.
-        sys.block_on(self.serve_using_actix())
+        sys.block_on(self.serve_using_actix_with_context())
     }
 
+    async fn serve_using_actix_with_context(self) -> anyhow::Result<()> {
+        self.serve_using_actix()
+            .await
+            .context("The server has encountered I/O error, while running.")
+    }
     async fn serve_using_actix(self) -> anyhow::Result<()> {
-        HttpServer::new(|| {
-            let app = actix_web::App::new();
-            use mma::serv::*;
-            app.service(redirect_to_human).service(human::search)
-        })
-        .bind(self.host_addr())
-        .with_context(|| {
-            format!(
-                "The server has encountered I/O errror, while trying to bind to {:}.",
-                self.host_addr()
-            )
-        })?
+        let res = (|| -> anyhow::Result<_> {
+            let db_pool = web::Data::new(mma::db::establish_connection_pool()?);
+            let server = HttpServer::new(move || {
+                let app = actix_web::App::new();
+                use mma::serv::*;
+                app.app_data(db_pool.clone())
+                    .service(redirect_to_human)
+                    .service(human::search)
+            })
+            .bind(self.host_addr())
+            .with_context(|| {
+                format!(
+                    "The server has encountered I/O errror, while trying to bind to {:}.",
+                    self.host_addr()
+                )
+            })?;
+            Ok(server)
+        })()
+        .context("Failed to setup a server.")?
         .run()
-        .await
-        .context("The server has encountered I/O error, while running.")
+        .await;
+        Ok(res?)
     }
 }

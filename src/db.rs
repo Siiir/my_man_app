@@ -1,13 +1,15 @@
 //! Code dependant on database and its system.
 
+use anyhow::Context;
+use diesel::{Connection, MysqlConnection};
+use std::sync::OnceLock;
+
 pub mod cmd;
 pub mod data_types;
 pub mod human;
 pub mod table_name;
 
-use anyhow::Context;
-use diesel::{Connection, MysqlConnection};
-use std::sync::OnceLock;
+pub type DbPool = r2d2::Pool<diesel::r2d2::ConnectionManager<MysqlConnection>>;
 
 /// Gets the database URL.
 ///
@@ -33,4 +35,13 @@ pub fn get_url() -> anyhow::Result<&'static str> {
 pub fn establish_connection() -> anyhow::Result<MysqlConnection> {
     (|| -> anyhow::Result<MysqlConnection> { Ok(MysqlConnection::establish(get_url()?)?) })()
         .context("Failed to establish connection to the database.")
+}
+
+pub fn establish_connection_pool() -> anyhow::Result<DbPool> {
+    (|| -> anyhow::Result<_> {
+        let database_url = get_url()?;
+        let manager = diesel::r2d2::ConnectionManager::<MysqlConnection>::new(database_url);
+        Ok(r2d2::Pool::builder().build(manager)?)
+    })()
+    .context("Failed to create a pool. Database connections have nowhere to swim.")
 }

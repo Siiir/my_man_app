@@ -7,15 +7,26 @@ pub async fn redirect_to_human() -> impl actix_web::Responder {
 
 pub mod human {
     use actix_web::{get, web, HttpResponse, Responder};
+    use anyhow::Context;
 
     #[get("/human")]
-    async fn search(query: web::Query<crate::HumanPatternBuf>) -> impl Responder {
+    async fn search(
+        query: web::Query<crate::HumanPatternBuf>,
+        db_pool: web::Data<crate::DbPool>,
+    ) -> impl Responder {
         let pattern = query.into_inner();
-        // Debug
-        let pattern = format!("{:?}", pattern);
-        dbg!(&pattern);
-        // crate::db::human::search(&mut crate::db::establish_connection().unwrap(), )
-        // Process the pattern as needed
-        HttpResponse::Ok().body(pattern)
+
+        // Log
+        tracing::info!("Received human query with filter: {pattern}");
+
+        // The search
+        let mut connection = db_pool
+            .get()
+            .context("No free database connection in the pool.")
+            .unwrap();
+        let ret = crate::db::human::search(&mut connection, pattern).unwrap();
+
+        // Req. result
+        HttpResponse::Ok().body(tabled::Table::new(ret).to_string())
     }
 }
