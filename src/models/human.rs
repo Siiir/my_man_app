@@ -9,3 +9,19 @@ pub struct Human {
     pub surname: String,
     pub nickname: crate::db::data_types::NullableString,
 }
+
+impl<'h> IntoIterator for Human {
+    type Item = String;
+
+    type IntoIter = std::array::IntoIter<String, 4>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let Self {
+            id,
+            name,
+            surname,
+            nickname,
+        } = self;
+        [id.to_string(), name, surname, nickname.into()].into_iter()
+    }
+}

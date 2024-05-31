@@ -910,7 +910,9 @@ dependencies = [
  "r2d2",
  "serde",
  "strum",
+ "table_to_html",
  "tabled",
+ "tap",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1382,6 +1384,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "table_to_html"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0df745cc3774c5ff6c21a215fb6b7446a138b85ad0e75bc8000c2a36813061a9"
+dependencies = [
+ "tabled",
+]
+
+[[package]]
 name = "tabled"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1404,6 +1415,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "tap"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "thread_local"

@@ -77,6 +77,11 @@ pub mod nullable_string {
             Some(value).into()
         }
     }
+    impl From<NullableString> for String {
+        fn from(value: NullableString) -> Self {
+            value.0.unwrap_or_else(|| "null".into())
+        }
+    }
 
     // Diesel traits, that are in fact simple delegations on the semantic level.
 

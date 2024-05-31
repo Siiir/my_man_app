@@ -27,6 +27,9 @@ pub mod human {
         let ret = crate::db::human::search(&mut connection, pattern).unwrap();
 
         // Req. result
-        HttpResponse::Ok().body(tabled::Table::new(ret).to_string())
+        let mut table = tabled::Table::new(ret);
+        let table = table.with(tabled::settings::Style::dots());
+        let html_table = format!("<pre>{table}</pre>");
+        HttpResponse::Ok().body(html_table)
     }
 }
