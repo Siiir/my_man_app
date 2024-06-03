@@ -45,3 +45,13 @@ pub fn establish_connection_pool() -> anyhow::Result<DbPool> {
     })()
     .context("Failed to create a pool. Database connections have nowhere to swim.")
 }
+pub fn connect_using_pool_with_context(
+    db_pool: &r2d2::Pool<diesel::r2d2::ConnectionManager<MysqlConnection>>,
+) -> Result<r2d2::PooledConnection<diesel::r2d2::ConnectionManager<MysqlConnection>>, anyhow::Error>
+{
+    let connection = db_pool
+        .get()
+        .context("No free database connection in the pool.")
+        .context("Can't connect to database.")?;
+    Ok(connection)
+}

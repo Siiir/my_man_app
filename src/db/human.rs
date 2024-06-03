@@ -38,10 +38,23 @@ pub fn add(
 ///  and so the narrowing of the search group.
 /// So it meets the goal that this function can actually return many humans (the search group).
 /// You can then try to narrow the search group by repetitive calls.
-pub fn search(
+pub fn search_with_context(
     connection: &mut diesel::MysqlConnection,
-    mut pattern: crate::HumanPatternBuf,
+    pattern: crate::HumanPatternBuf,
 ) -> anyhow::Result<Vec<models::Human>> {
+    search(pattern, connection)
+        .context(concat!(
+            "Couldn't load records from table `",
+            table_name::human!(),
+            "`."
+        ))
+        .context("Search for humans failed.")
+}
+
+fn search(
+    mut pattern: crate::HumanPatternBuf,
+    connection: &mut diesel::prelude::MysqlConnection,
+) -> Result<Vec<models::Human>, diesel::result::Error> {
     // Prepare filter
     let filter = {
         let f = [
@@ -66,12 +79,6 @@ pub fn search(
     } else {
         query.load(connection)
     }
-    .context(concat!(
-        "Couldn't load records from table `",
-        table_name::human!(),
-        "`."
-    ))
-    .context("Search for humans failed.")
 }
 
 /// Finds the human with the highest id number if exists.

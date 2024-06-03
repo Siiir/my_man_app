@@ -23,7 +23,8 @@ impl mma::DbCommand for HumanCmd {
         match self {
             HumanCmd::Add(new_human) => mma::db::human::add(connection, (&new_human).into()),
             HumanCmd::Search(human_pattern) => {
-                let human_records = mma::db::human::search(connection, human_pattern.into())?;
+                let human_records =
+                    mma::db::human::search_with_context(connection, human_pattern.into())?;
                 println!("{}", mma::util::prin_table(human_records));
                 Ok(())
             }
