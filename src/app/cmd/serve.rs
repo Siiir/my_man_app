@@ -3,7 +3,10 @@
 use actix_web::{web, HttpServer};
 use anyhow::Context;
 
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::{
+    future::Future,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+};
 
 /// Command that will cause app to serve its content at the specified address and port.
 #[derive(Clone, clap::Args)]
@@ -36,12 +39,14 @@ impl ServeCmd {
     }
 
     async fn serve_using_actix_with_context(self) -> anyhow::Result<()> {
-        self.serve_using_actix()
+        self.running_server_using_actix()?
             .await
             .context("The server has encountered I/O error, while running.")
     }
-    async fn serve_using_actix(self) -> anyhow::Result<()> {
-        let res = (|| -> anyhow::Result<_> {
+    fn running_server_using_actix(
+        self,
+    ) -> anyhow::Result<impl Future<Output = std::io::Result<()>>> {
+        let server = (|| -> anyhow::Result<_> {
             let db_pool = web::Data::new(mma::db::establish_connection_pool()?);
             let server = HttpServer::new(move || {
                 let app = actix_web::App::new();
@@ -63,9 +68,7 @@ impl ServeCmd {
             })?;
             Ok(server)
         })()
-        .context("Failed to setup a server.")?
-        .run()
-        .await;
-        Ok(res?)
+        .context("Failed to setup a server.")?;
+        Ok(server.run())
     }
 }
