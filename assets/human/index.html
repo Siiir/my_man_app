@@ -1,37 +1,49 @@
+<!DOCTYPE html>
 <html>
 
 <head>
   <title>mma – human searcher</title>
-  <link rel="stylesheet" link="assets/human/style.css" />
+  <link rel="stylesheet" href="assets/human/style.css" />
+  <script>
+    function removeEmptyFields(form) {
+      const elements = form.elements;
+      for (let i = elements.length - 1; i >= 0; i--) {
+        const element = elements[i];
+        if (element.type !== 'checkbox' && !element.value) {
+          element.name = '';
+        }
+      }
+    }
+  </script>
 </head>
 
 <body>
-  <h1>Search Humans</h1>
-  <form action="/human" method="get">
+  <!-- <h1>Search Humans</h1> -->
+  <form action="/human" method="get" onsubmit="removeEmptyFields(this)">
+    <div>
+      <button type="submit">Search for human</button>
+    </div>
     <div>
       <label for="id">ID:</label>
-      <input type="text" id="id" name="id">
+      <input type="number" id="id" name="id">
     </div>
     <div>
       <label for="name">Name:</label>
       <input type="text" id="name" name="name">
-      <input type="checkbox" id="like_name" name="like_name">
       <label for="like_name">Like</label>
+      <input type="checkbox" id="like_name" name="like_name">
     </div>
     <div>
       <label for="surname">Surname:</label>
       <input type="text" id="surname" name="surname">
-      <input type="checkbox" id="like_surname" name="like_surname">
       <label for="like_surname">Like</label>
+      <input type="checkbox" id="like_surname" name="like_surname">
     </div>
     <div>
       <label for="nickname">Nickname:</label>
       <input type="text" id="nickname" name="nickname">
-      <input type="checkbox" id="like_nickname" name="like_nickname">
       <label for="like_nickname">Like</label>
-    </div>
-    <div>
-      <button type="submit">Search</button>
+      <input type="checkbox" id="like_nickname" name="like_nickname">
     </div>
   </form>
 

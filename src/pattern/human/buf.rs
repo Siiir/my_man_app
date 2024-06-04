@@ -11,17 +11,17 @@ pub struct HumanPatternBuf {
 
     // Name
     pub name: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "util::bool_from_checkbox")]
     pub like_name: bool,
 
     // Surname
     pub surname: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "util::bool_from_checkbox")]
     pub like_surname: bool,
 
     // Nickname
     pub nickname: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "util::bool_from_checkbox")]
     pub like_nickname: bool,
 }
 
