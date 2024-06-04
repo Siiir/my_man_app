@@ -3,6 +3,7 @@ pub use db::{cmd::DbCommand, DbPool};
 pub mod db;
 // serving
 pub use serv::file::{file_service, serve_file, static_file_service};
+pub use serv::human::query::HumanHttpQuery;
 pub mod serv;
 // models
 pub mod models;

@@ -37,7 +37,7 @@ pub fn establish_connection() -> anyhow::Result<MysqlConnection> {
         .context("Failed to establish connection to the database.")
 }
 
-pub fn establish_connection_pool() -> anyhow::Result<DbPool> {
+pub fn establish_connection_pool_with_context() -> anyhow::Result<DbPool> {
     (|| -> anyhow::Result<_> {
         let database_url = get_url()?;
         let manager = diesel::r2d2::ConnectionManager::<MysqlConnection>::new(database_url);

@@ -33,3 +33,5 @@ actix-service = "2.0.2"
 cached = { version = "0.51.3", features = ["async"] }
 # Miscellaneous
 serde = { version = "1.0.203", features = ["derive"] }
+handlebars = "5.1.2"
+serde_json = "1.0.117"

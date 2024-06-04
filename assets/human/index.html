@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>mma – human searcher</title>
+  <title>mma – human browser</title>
   <link rel="stylesheet" href="assets/human/style.css" />
   <script>
     function removeEmptyFields(form) {
@@ -18,36 +18,35 @@
 </head>
 
 <body>
-  <!-- <h1>Search Humans</h1> -->
   <form action="/human" method="get" onsubmit="removeEmptyFields(this)">
     <div>
       <button type="submit">Search for human</button>
     </div>
     <div>
       <label for="id">ID:</label>
-      <input type="number" id="id" name="id">
+      <input type="number" id="id" name="id" value="{{id}}">
     </div>
     <div>
       <label for="name">Name:</label>
-      <input type="text" id="name" name="name">
+      <input type="text" id="name" name="name" value="{{name}}">
       <label for="like_name">Like</label>
-      <input type="checkbox" id="like_name" name="like_name">
+      <input type="checkbox" id="like_name" name="like_name" {{#if like_name}}checked{{/if}}>
     </div>
     <div>
       <label for="surname">Surname:</label>
-      <input type="text" id="surname" name="surname">
+      <input type="text" id="surname" name="surname" value="{{surname}}">
       <label for="like_surname">Like</label>
-      <input type="checkbox" id="like_surname" name="like_surname">
+      <input type="checkbox" id="like_surname" name="like_surname" {{#if like_surname}}checked{{/if}}>
     </div>
     <div>
       <label for="nickname">Nickname:</label>
-      <input type="text" id="nickname" name="nickname">
+      <input type="text" id="nickname" name="nickname" value="{{nickname}}">
       <label for="like_nickname">Like</label>
-      <input type="checkbox" id="like_nickname" name="like_nickname">
+      <input type="checkbox" id="like_nickname" name="like_nickname" {{#if like_nickname}}checked{{/if}}>
     </div>
   </form>
 
-  {html_table}
+  {{{humans_found}}}
 
 </body>
 

@@ -11,17 +11,17 @@ pub struct HumanPatternBuf {
 
     // Name
     pub name: Option<String>,
-    #[serde(default, deserialize_with = "util::bool_from_checkbox")]
+    #[serde(default)]
     pub like_name: bool,
 
     // Surname
     pub surname: Option<String>,
-    #[serde(default, deserialize_with = "util::bool_from_checkbox")]
+    #[serde(default)]
     pub like_surname: bool,
 
     // Nickname
     pub nickname: Option<String>,
-    #[serde(default, deserialize_with = "util::bool_from_checkbox")]
+    #[serde(default)]
     pub like_nickname: bool,
 }
 
@@ -128,6 +128,28 @@ impl HumanPatternBuf {
 }
 
 // CRUD-C: Conversions into `Self`
+impl From<crate::HumanHttpQuery> for HumanPatternBuf {
+    fn from(value: crate::HumanHttpQuery) -> Self {
+        let crate::HumanHttpQuery {
+            id,
+            name,
+            like_name,
+            surname,
+            like_surname,
+            nickname,
+            like_nickname,
+        } = value;
+        Self {
+            id,
+            name,
+            like_name,
+            surname,
+            like_surname,
+            nickname,
+            like_nickname,
+        }
+    }
+}
 impl<'b, 'c, 'd> From<crate::HumanPatternBor<'b, 'c, 'd>> for HumanPatternBuf {
     fn from(bor: crate::HumanPatternBor<'b, 'c, 'd>) -> Self {
         let [name, surname, nickname] =

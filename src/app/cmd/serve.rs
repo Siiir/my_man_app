@@ -47,11 +47,13 @@ impl ServeCmd {
         self,
     ) -> anyhow::Result<impl Future<Output = std::io::Result<()>>> {
         let server = (|| -> anyhow::Result<_> {
-            let db_pool = web::Data::new(mma::db::establish_connection_pool()?);
+            let db_pool = web::Data::new(mma::db::establish_connection_pool_with_context()?);
+            let content_templs = web::Data::new(mma::serv::setup_content_templs_with_context()?);
             let server = HttpServer::new(move || {
                 let app = actix_web::App::new();
                 use mma::serv::*;
                 app.app_data(db_pool.clone())
+                    .app_data(content_templs.clone())
                     .service(redirect_to_human)
                     .service(mma::static_file_service::<&str>(
                         "text/css; charset=UTF-8",

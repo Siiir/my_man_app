@@ -1,3 +1,9 @@
+use anyhow::Context;
+use handlebars::Handlebars;
+
+pub mod file;
+pub mod human;
+
 #[actix_web::get("/")]
 pub async fn redirect_to_human() -> impl actix_web::Responder {
     actix_web::HttpResponse::PermanentRedirect()
@@ -5,59 +11,11 @@ pub async fn redirect_to_human() -> impl actix_web::Responder {
         .finish()
 }
 
-pub mod human;
-
-pub mod file {
-    use std::{
-        path::{Path, PathBuf},
-        sync::Arc,
-    };
-
-    use actix_web::{dev::HttpServiceFactory, web, HttpResponse};
-
-    pub fn static_file_service<P>(
-        content_type: &'static str,
-        file_path: &'static str,
-    ) -> impl HttpServiceFactory + 'static
-    where
-        P: AsRef<Path>,
-    {
-        file_service::<&str, _>(content_type, file_path, core::convert::identity)
-    }
-
-    pub fn file_service<P, F>(
-        content_type: &'static str,
-        file_path: &'static str,
-        adjust_resp: F,
-    ) -> impl HttpServiceFactory + 'static
-    where
-        P: AsRef<Path>,
-        F: (Fn(String) -> String) + Copy + 'static,
-    {
-        web::resource(file_path).get(move || serve_file(content_type, file_path, adjust_resp))
-    }
-
-    pub async fn serve_file<P, F>(content_type: &str, file_path: P, adjust_resp: F) -> HttpResponse
-    where
-        P: AsRef<Path>,
-        F: FnOnce(String) -> String,
-    {
-        #[cached::proc_macro::cached(
-            time = 60,
-            size = 4092,
-            convert = "{file_path.to_owned()}",
-            key = "PathBuf"
-        )]
-        async fn get_content(file_path: &Path) -> Result<String, Arc<std::io::Error>> {
-            match fs_err::tokio::read_to_string(file_path).await {
-                Ok(s) => Ok(s.into()),
-                Err(e) => Err(e.into()),
-            }
-        }
-        let file_path = file_path.as_ref();
-        match get_content(&file_path).await.map(adjust_resp) {
-            Ok(content) => HttpResponse::Ok().content_type(content_type).body(content),
-            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
-        }
-    }
+pub fn setup_content_templs_with_context() -> Result<Handlebars<'static>, anyhow::Error> {
+    setup_content_templs().context("Failed to setup content templates.")
+}
+pub fn setup_content_templs() -> Result<Handlebars<'static>, handlebars::TemplateError> {
+    let mut content_templs = Handlebars::new();
+    content_templs.register_template_file("human", "./assets/human/index.html")?;
+    Ok(content_templs)
 }
