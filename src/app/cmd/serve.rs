@@ -48,6 +48,10 @@ impl ServeCmd {
                 use mma::serv::*;
                 app.app_data(db_pool.clone())
                     .service(redirect_to_human)
+                    .service(mma::static_file_service::<&str>(
+                        "text/css; charset=UTF-8",
+                        "assets/human/style.css",
+                    ))
                     .service(human::search)
             })
             .bind(self.host_addr())

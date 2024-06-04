@@ -1,5 +1,7 @@
 pub use search_fn::search;
 pub mod search_fn {
+    use std::future::Future;
+
     use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
     use anyhow::Context;
 
@@ -17,13 +19,16 @@ pub mod search_fn {
         // Log
         tracing::info!("Received human query with filter \"{pattern}\" from ip {user_ip}.");
         // Perform
-        match raw_search(pattern, &db_pool).with_context(|| format!("Failed to perform request.")) {
+        match raw_search(pattern, &db_pool)
+            .await
+            .with_context(|| format!("Failed to perform request."))
+        {
             Ok(ret) => ret,
             Err(err) => HttpResponse::InternalServerError().body(format!("<pre>{err}</pre>")),
         }
     }
 
-    fn raw_search(
+    async fn raw_search(
         pattern: crate::HumanPatternBuf,
         db_pool: &crate::DbPool,
     ) -> anyhow::Result<HttpResponse> {
@@ -32,13 +37,18 @@ pub mod search_fn {
         let humans_found = crate::db::human::search_with_context(&mut connection, pattern)?;
 
         // Req. result
-        page_with_showing(humans_found)
+        Ok(page_showing(humans_found).await)
     }
 
-    fn page_with_showing(humans: Vec<crate::models::Human>) -> anyhow::Result<HttpResponse> {
+    fn page_showing(humans: Vec<crate::models::Human>) -> impl Future<Output = HttpResponse> {
         let mut tabled_humans = tabled::Table::new(humans);
         let tabled_humans = tabled_humans.with(tabled::settings::Style::dots());
         let html_table = format!("<pre>{tabled_humans}</pre>");
-        Ok(HttpResponse::Ok().body(html_table))
+
+        crate::serve_file(
+            "text/html; charset=UTF-8",
+            "assets/human/index.html",
+            move |content| content.replace("{html_table}", &html_table),
+        )
     }
 }
