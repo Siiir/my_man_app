@@ -2,8 +2,25 @@
 <html>
 
 <head>
-  <title>mma – human browser</title>
+  <title>Our wonderful humans</title>
   <link rel="stylesheet" href="assets/human/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <style>
+    .like-checkbox {
+      display: none;
+    }
+
+    .like-label {
+      display: inline-block;
+      font-size: 1.5em;
+      color: grey;
+      cursor: pointer;
+    }
+
+    .like-checkbox:checked+.like-label {
+      color: blue;
+    }
+  </style>
   <script>
     function removeEmptyFields(form) {
       const elements = form.elements;
@@ -18,10 +35,8 @@
 </head>
 
 <body>
+  <h1>Tomix human browser</h1>
   <form action="/human" method="get" onsubmit="removeEmptyFields(this)">
-    <div>
-      <button type="submit">Search for human</button>
-    </div>
     <div>
       <label for="id">ID:</label>
       <input type="number" id="id" name="id" value="{{id}}">
@@ -29,20 +44,25 @@
     <div>
       <label for="name">Name:</label>
       <input type="text" id="name" name="name" value="{{name}}">
-      <label for="like_name">Like</label>
-      <input type="checkbox" id="like_name" name="like_name" {{#if like_name}}checked{{/if}}>
+      <input type="checkbox" id="like_name" name="like_name" class="like-checkbox" {{#if like_name}}checked{{/if}}>
+      <label for="like_name" class="like-label"><i class="fas fa-thumbs-up"></i></label>
     </div>
     <div>
       <label for="surname">Surname:</label>
       <input type="text" id="surname" name="surname" value="{{surname}}">
-      <label for="like_surname">Like</label>
-      <input type="checkbox" id="like_surname" name="like_surname" {{#if like_surname}}checked{{/if}}>
+      <input type="checkbox" id="like_surname" name="like_surname" class="like-checkbox" {{#if
+        like_surname}}checked{{/if}}>
+      <label for="like_surname" class="like-label"><i class="fas fa-thumbs-up"></i></label>
     </div>
     <div>
       <label for="nickname">Nickname:</label>
       <input type="text" id="nickname" name="nickname" value="{{nickname}}">
-      <label for="like_nickname">Like</label>
-      <input type="checkbox" id="like_nickname" name="like_nickname" {{#if like_nickname}}checked{{/if}}>
+      <input type="checkbox" id="like_nickname" name="like_nickname" class="like-checkbox" {{#if
+        like_nickname}}checked{{/if}}>
+      <label for="like_nickname" class="like-label"><i class="fas fa-thumbs-up"></i></label>
+    </div>
+    <div name="submit">
+      <button type="submit">Find yer folk!</button>
     </div>
   </form>
 

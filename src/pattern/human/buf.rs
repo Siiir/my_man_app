@@ -181,7 +181,6 @@ impl From<crate::HumanPatternOwn> for HumanPatternBuf {
     }
 }
 // CRUD-R: Display
-
 impl fmt::Display for HumanPatternBuf {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(id) = &self.id {
@@ -196,7 +195,7 @@ impl fmt::Display for HumanPatternBuf {
             if let Some(field_val) = field_val {
                 f.write_str(field_name)?;
                 f.write_str(if is_like_pattern { " LIKE " } else { " = " })?;
-                write!(f, "{field_val}")?;
+                write!(f, "{field_val}, ")?;
             }
         }
         Ok(())
