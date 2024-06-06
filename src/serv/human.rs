@@ -51,7 +51,7 @@ pub mod search_fn {
         humans: Vec<crate::models::Human>,
     ) -> HttpResponse {
         let mut tabled_humans = tabled::Table::new(humans);
-        let tabled_humans = tabled_humans.with(tabled::settings::Style::dots());
+        let tabled_humans = tabled_humans.with(tabled::settings::Style::extended());
         let html_table = format!("<pre>{tabled_humans}</pre>");
 
         let mut data = serde_json::json!({
