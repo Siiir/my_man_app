@@ -19,7 +19,7 @@ pub fn add(
                 insert(connection, new_human)?;
                 let inserted_human: models::Human =
                     crate::db::human::that_was_just_inserted(connection)?;
-                log::info!(
+                tracing::info!(
                     "Successfully inserted human record:\n{:}",
                     crate::util::prin_table([&inserted_human])
                 );
