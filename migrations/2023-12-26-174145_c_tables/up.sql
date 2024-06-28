@@ -26,7 +26,7 @@ CREATE TABLE Client_Project
 CREATE TABLE Employee
 (
     human_id int            NOT NULL AUTO_INCREMENT,
-    rank     varchar(12)    NOT NULL,
+    `rank`     varchar(12)    NOT NULL,
     salary   decimal(12, 2) NOT NULL,
     PRIMARY KEY (human_id)
 );

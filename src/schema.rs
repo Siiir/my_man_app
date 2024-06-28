@@ -81,7 +81,7 @@ diesel::table! {
         fancy_name -> Varchar,
         start_date -> Date,
         end_date -> Nullable<Date>,
-        deadline -> Timestamp,
+        deadline -> Nullable<Timestamp>,
         responsible -> Nullable<Integer>,
     }
 }
